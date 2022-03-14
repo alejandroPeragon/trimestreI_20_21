@@ -2,6 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Ciclo;
+use App\Models\Especialidad;
+use App\Models\Modulo;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
@@ -17,6 +21,55 @@ class DatabaseSeeder extends Seeder
         Schema::disableForeignKeyConstraints();
         //
         Schema::enableForeignKeyConstraints();
+
+        self::seedEspecialidades();
+        self::seedCiclos();
+        self::seedModulos();
+        self::seedUser();
+    }
+
+    private static function seedEspecialidades(){
+        $i=0;
+        Especialidad::truncate();
+        foreach(self::$arrayEspecialidades as $especialidad){
+            $e = new Especialidad;
+            $e->nombre = $especialidad[$i];
+            $e->save();
+            $i++;
+        }
+    }
+
+    private static function seedCiclos(){
+        Ciclo::truncate();
+        foreach(self::$arrayCiclos as $ciclo){
+            $c = new Ciclo;
+            $c->grado = $ciclo['grado'];
+            $c->nombre = $ciclo['nombre'];
+            $c->save();
+        }
+    }
+
+    private static function seedModulos(){
+        Modulo::truncate();
+        foreach(self::$arrayModulos as $modulo){
+            if($modulo['ciclo'] === "6"){
+                $m = new Modulo;
+                $m->nombre = $modulo['nombre'];
+                $m->especialidad_id = $modulo['especialidad'];
+                $m->ciclo_id = $modulo['ciclo'];
+                $m->save();
+            }
+        }
+    }
+
+    private static function seedUser(){
+        User::truncate();
+        \App\Models\User::factory(2)->create(); // Añadir 2 registros de usuarios
+        $admin = new User();
+        $admin ->name=env('ADMIN_NAME'); // coge el nombre que esta en el fichero .env
+        $admin ->email=env('ADMIN_EMAIL');
+        $admin->password = bcrypt(env('ADMIN_PASSWORD'));
+        $admin->save();
     }
 
     private static $arrayEspecialidades = ['Informática', 'Sistemas y Aplicaciones Informáticas'];
